@@ -1,0 +1,34 @@
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persistent volume
+      - postgres_data:/var/lib/postgresql/data
+      # Bind local scripts to image's initialization scripts
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d appdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-devpassword}@db:5432/appdb
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

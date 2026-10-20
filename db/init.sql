@@ -1,0 +1,7 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE IF NOT EXISTS documents (
+    id BIGSERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    embedding VECTOR(1536) --example dimension
+);
