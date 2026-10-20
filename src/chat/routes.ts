@@ -8,7 +8,7 @@ router.post("/send-message", async (req: Request, res: Response) => {
   const sessionId = req.headers["session-id"] as string;
   const message = req.body["message"] as string;
 
-  await graph.invoke(
+  const result = await graph.invoke(
     {
       messages: [message],
     },
@@ -19,7 +19,7 @@ router.post("/send-message", async (req: Request, res: Response) => {
     },
   );
 
-  res.status(200).send(JSON.stringify("hi"));
+  res.json({ response: result.response })
 });
 
 export default router;

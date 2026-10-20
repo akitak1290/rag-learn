@@ -27,6 +27,9 @@ export const config = {
     "PORT": pgPort
   }),
   openaiApiKey: required("OPENAI_API_KEY"),
+  openaiModerationApiKey: required("OPENAI_MODERATION_API_KEY"),
+  openaiModel: required("OPENAI_MODEL"),
+  openaiBaseUrl: required("OPENAI_BASE_URL"),
   pgDb,
   pgUser,
   pgPassword
