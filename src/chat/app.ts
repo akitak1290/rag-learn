@@ -1,8 +1,27 @@
-// src/chat/app.ts
 import express from "express";
-// import { chatRouter } from "./routes";
+import chatRouter from "./routes.js";
+import { pool } from "../db/pool.js";
+import { testConnection } from "../db/queries.js";
+import { logger } from "../utils/logger.js";
+import { requestLogger } from "./middleware.js";
 
 export const app = express();
 
+app.use(requestLogger);
 app.use(express.json());
-// app.use("/chat", chatRouter);
+
+app.use("/healthcheck", async (_, res) => {
+  let dbStatus;
+  try {
+    await pool.query(testConnection);
+    dbStatus = "ok";
+  } catch (err) {
+    logger.error(`PG pool connection error: ${err}`);
+    dbStatus = "error";
+  }
+
+  res.status(200).send({
+    dbStatus,
+  });
+});
+app.use("/chat", chatRouter);

@@ -1,6 +1,7 @@
 import { pool } from "./db/pool.js";
 import { app } from "./chat/app.js";
 import { config } from "./config.js";
+import { logger } from "./utils/logger.js";
 import { testConnection } from "./db/queries.js";
 import type { Server } from "node:http";
 
@@ -12,16 +13,18 @@ async function shutdown() {
 }
 
 (async () => {
-  server = app.listen(config.port);
+  server = app.listen(config.port, "127.0.0.1", () => {
+    logger.info(`app listening on port ${config.port}`);
+  });
 
-  // test connection
-  try {
-    const result = await pool.query(testConnection);
+  server.on("error", (err) => {
+    logger.error("Server error");
+  });
 
-    console.log("Connect to PostgresSQL: ", result.rows);
-  } finally {
-    await shutdown();
-  }
+  server.on("close", () => {
+    logger.info("Server closed");
+  });
+
 })();
 
 process.once("SIGINT", shutdown);
