@@ -1,2 +1,0 @@
-export declare const testConnection = "\n    SELECT\n        current_database() AS database,\n        extname AS extension\n    FROM pg_extension\n    WHERE extname = 'vector'\n";
-//# sourceMappingURL=queries.d.ts.map
