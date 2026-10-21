@@ -12,7 +12,43 @@ Use earlier messages, including previous user and assistant messages, as context
 Do not answer earlier questions again unless the latest message explicitly asks you to.
 `;
 
-export const mainLlmNode = async (state: typeof FlowState.State) => {
+import { tool } from "@langchain/core/tools";
+import { z } from "zod";
+
+// TODO: update these to call to respective services per tool
+// for now return a static response
+const searchFaq = tool(
+  async ({ query }) => {
+    return `Placeholder FAQ result for: ${query}`;
+  },
+  {
+    name: "search_faq",
+    description: "Search public agency FAQs and help pages.",
+    schema: z.object({
+      query: z.string(),
+    }),
+  },
+);
+
+const checkStatus = tool(
+  async ({ caseReference }) => {
+    return `Placeholder status for case: ${caseReference}`;
+  },
+  {
+    name: "check_status",
+    description: "Check the status of an existing case.",
+    schema: z.object({
+      caseReference: z.string(),
+    }),
+  },
+);
+
+// TODO: need to refactor these tools out
+export const tools = [searchFaq, checkStatus];
+
+const SupervisorModel = ResponseModel.bindTools(tools);
+
+export const supervisorNode = async (state: typeof FlowState.State) => {
   const violations = state.guardrail?.violations ?? [];
 
   // add additional note to tell LLM to address guardrail's findings
@@ -30,17 +66,24 @@ export const mainLlmNode = async (state: typeof FlowState.State) => {
     ...state.messages,
   ];
 
-  const result = await ResponseModel.invoke(messages);
+  const result = await SupervisorModel.invoke(messages);
 
   logger.info(
     {
-      event: "llm_response_completed",
+      event: "supervisor_completed",
       userQuery: getLatestMessage(state),
+      toolCalls: result.tool_calls?.map((call) => call.name) ?? "",
       llmResponse: JSON.stringify(result.content),
     },
-    "Get LLM response completed",
+    "Supervisor invocation completed",
   );
 
+  // 1. The graph will execute these tools next.
+  if (result.tool_calls && result.tool_calls.length > 0) {
+    return { messages: [result] };
+  }
+
+  // 2. The graph will return user-facing messages
   return {
     messages: [result],
     response:

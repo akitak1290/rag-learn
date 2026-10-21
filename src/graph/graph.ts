@@ -6,8 +6,9 @@ import {
   guardrailNode,
   guardrailResponseNode,
 } from "./nodes/guardrail.js";
-import { mainLlmNode } from "./nodes/basicResponse.js";
+import { supervisorNode, tools } from "./nodes/supervisor.js";
 import { overrideNode } from "./nodes/overrideDetector.js";
+import { ToolNode, toolsCondition } from "@langchain/langgraph/prebuilt";
 
 const checkpointer = new MemorySaver();
 
@@ -28,6 +29,14 @@ const routeAfterGuardrail = (state: typeof FlowState.State) => {
   }
 };
 
+const routeBeforeSupervisor = (state: typeof FlowState.State) => {
+  if (state.activeDialog) {
+    return "dialog";
+  } else {
+    return "supervisor";
+  }
+};
+
 enum NodeNames {
   GUARDRAIL = "guardrail_start",
   OVERRIDE = "override_detection_start",
@@ -35,9 +44,12 @@ enum NodeNames {
   GUARDRAIL_RESPONSE = "guardrail_response",
   GUARDRAIL_ERROR = "guardrail_error",
   RESPONSE = "main_llm",
+  PRE_CHECK = "pre_check_router",
+  DIALOG = "dialog",
+  SUPERVISOR = "supervisor",
+  TOOLS = "tools",
 }
 
-// TODO: move node name to enum for easier reference?
 export const graph = graphBuilder
   // nodes
   .addNode(NodeNames.GUARDRAIL, guardrailNode)
@@ -45,7 +57,10 @@ export const graph = graphBuilder
   .addNode(NodeNames.ROUTER, () => ({}))
   .addNode(NodeNames.GUARDRAIL_RESPONSE, guardrailResponseNode)
   .addNode(NodeNames.GUARDRAIL_ERROR, guardrailErrorNode)
-  .addNode(NodeNames.RESPONSE, mainLlmNode)
+  .addNode(NodeNames.PRE_CHECK, () => ({}))
+  .addNode(NodeNames.DIALOG, () => ({})) // TODO: update after dialog flow is done
+  .addNode(NodeNames.SUPERVISOR, supervisorNode)
+  .addNode(NodeNames.TOOLS, new ToolNode(tools))
   // edges
   .addEdge(START, NodeNames.GUARDRAIL)
   .addEdge(START, NodeNames.OVERRIDE)
@@ -54,11 +69,22 @@ export const graph = graphBuilder
   .addConditionalEdges(NodeNames.ROUTER, routeAfterGuardrail, {
     blocked: NodeNames.GUARDRAIL_RESPONSE,
     error: NodeNames.GUARDRAIL_ERROR,
-    continue: NodeNames.RESPONSE,
+    continue: NodeNames.PRE_CHECK,
     cancel: END,
     escalate: END, // TODO: update after escalation flow is done
   })
+  .addConditionalEdges(NodeNames.PRE_CHECK, routeBeforeSupervisor, {
+    dialog: NodeNames.DIALOG,
+    supervisor: NodeNames.SUPERVISOR,
+  })
+  .addConditionalEdges(NodeNames.SUPERVISOR, toolsCondition, {
+    tools: NodeNames.TOOLS,
+    [END]: END,
+  })
+  .addEdge(NodeNames.TOOLS, NodeNames.SUPERVISOR)
+  // terminals
   .addEdge(NodeNames.GUARDRAIL_RESPONSE, END)
   .addEdge(NodeNames.GUARDRAIL_ERROR, END)
-  .addEdge(NodeNames.RESPONSE, END)
+  .addEdge(NodeNames.DIALOG, END)
+  .addEdge(NodeNames.SUPERVISOR, END)
   .compile({ checkpointer });
