@@ -3,6 +3,7 @@ import { state as FlowState } from "../state.js";
 import { logger } from "../../utils/logger.js";
 import { classifyInjection } from "./guardrailClassifier.js";
 import { HumanMessage, isHumanMessage } from "@langchain/core/messages";
+import { getLatestMessage } from "../../utils/annotation.js";
 
 const GUARDRAIL_TIMEOUT_MS = 20000;
 
@@ -152,7 +153,7 @@ async function runGuardrails(message: string): Promise<GuardrailResult> {
   }
 }
 export const guardrailNode = async (state: typeof FlowState.State) => {
-  const latestHumanMessage = [...state.messages].reverse().find(HumanMessage.isInstance);
+  const latestHumanMessage = getLatestMessage(state);
   if (!latestHumanMessage) return {};
 
   return {

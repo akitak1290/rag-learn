@@ -1,6 +1,8 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { model as ResponseModel } from "../../domains/llm.js";
 import { state as FlowState } from "../state.js";
+import { logger } from "../../utils/logger.js";
+import { getLatestMessage } from "../../utils/annotation.js";
 
 const prompt = `
 You are a helpful assistant.
@@ -25,10 +27,19 @@ export const mainLlmNode = async (state: typeof FlowState.State) => {
   const messages = [
     new SystemMessage(prompt),
     ...(state.guardrail?.verdict === "flag" ? [guardrailNote] : []),
-    ...state.messages
+    ...state.messages,
   ];
 
   const result = await ResponseModel.invoke(messages);
+
+  logger.info(
+    {
+      event: "llm_response_completed",
+      userQuery: getLatestMessage(state),
+      llmResponse: JSON.stringify(result.content),
+    },
+    "Get LLM response completed",
+  );
 
   return {
     messages: [result],

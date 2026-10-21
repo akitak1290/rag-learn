@@ -7,6 +7,7 @@ import {
   guardrailResponseNode,
 } from "./nodes/guardrail.js";
 import { mainLlmNode } from "./nodes/basicResponse.js";
+import { overrideNode } from "./nodes/overrideDetector.js";
 
 const checkpointer = new MemorySaver();
 
@@ -21,22 +22,43 @@ const routeAfterGuardrail = (state: typeof FlowState.State) => {
       return "error";
     case "pass":
     case "flag":
+      if (state.override === "cancel") return "cancel";
+      if (state.override === "human") return "escalate";
       return "continue";
   }
 };
 
+enum NodeNames {
+  GUARDRAIL = "guardrail_start",
+  OVERRIDE = "override_detection_start",
+  ROUTER = "router",
+  GUARDRAIL_RESPONSE = "guardrail_response",
+  GUARDRAIL_ERROR = "guardrail_error",
+  RESPONSE = "main_llm",
+}
+
+// TODO: move node name to enum for easier reference?
 export const graph = graphBuilder
-  .addNode("guardrail_start", guardrailNode)
-  .addNode("guardrail_response", guardrailResponseNode)
-  .addNode("guardrail_error", guardrailErrorNode)
-  .addNode("main_llm", mainLlmNode)
-  .addEdge(START, "guardrail_start")
-  .addConditionalEdges("guardrail_start", routeAfterGuardrail, {
-    blocked: "guardrail_response",
-    error: "guardrail_error",
-    continue: "main_llm",
+  // nodes
+  .addNode(NodeNames.GUARDRAIL, guardrailNode)
+  .addNode(NodeNames.OVERRIDE, overrideNode)
+  .addNode(NodeNames.ROUTER, () => ({}))
+  .addNode(NodeNames.GUARDRAIL_RESPONSE, guardrailResponseNode)
+  .addNode(NodeNames.GUARDRAIL_ERROR, guardrailErrorNode)
+  .addNode(NodeNames.RESPONSE, mainLlmNode)
+  // edges
+  .addEdge(START, NodeNames.GUARDRAIL)
+  .addEdge(START, NodeNames.OVERRIDE)
+  .addEdge(NodeNames.GUARDRAIL, NodeNames.ROUTER)
+  .addEdge(NodeNames.OVERRIDE, NodeNames.ROUTER)
+  .addConditionalEdges(NodeNames.ROUTER, routeAfterGuardrail, {
+    blocked: NodeNames.GUARDRAIL_RESPONSE,
+    error: NodeNames.GUARDRAIL_ERROR,
+    continue: NodeNames.RESPONSE,
+    cancel: END,
+    escalate: END, // TODO: update after escalation flow is done
   })
-  .addEdge("guardrail_response", END)
-  .addEdge("guardrail_error", END)
-  .addEdge("main_llm", END)
+  .addEdge(NodeNames.GUARDRAIL_RESPONSE, END)
+  .addEdge(NodeNames.GUARDRAIL_ERROR, END)
+  .addEdge(NodeNames.RESPONSE, END)
   .compile({ checkpointer });
