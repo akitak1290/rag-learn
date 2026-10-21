@@ -2,6 +2,7 @@ import { moderationClient } from "../../domains/llm.js";
 import { state as FlowState } from "../state.js";
 import { logger } from "../../utils/logger.js";
 import { classifyInjection } from "./guardrailClassifier.js";
+import { HumanMessage, isHumanMessage } from "@langchain/core/messages";
 
 const GUARDRAIL_TIMEOUT_MS = 20000;
 
@@ -151,11 +152,11 @@ async function runGuardrails(message: string): Promise<GuardrailResult> {
   }
 }
 export const guardrailNode = async (state: typeof FlowState.State) => {
-  const latest = state.messages[state.messages.length - 1];
-  if (!latest) return {};
+  const latestHumanMessage = [...state.messages].reverse().find(HumanMessage.isInstance);
+  if (!latestHumanMessage) return {};
 
   return {
-    guardrail: await runGuardrails(latest),
+    guardrail: await runGuardrails(latestHumanMessage.content as string),
   };
 };
 export const guardrailResponseNode = async () => ({
