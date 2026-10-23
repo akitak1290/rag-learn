@@ -1,3 +1,5 @@
+import "temporal-polyfill/full/global";
+
 import { pool } from "./prisma/pool.js";
 import { app } from "./chat/app.js";
 import { config } from "./config.js";

@@ -9,7 +9,8 @@ model Faq {
   question    String
   answer      String
   url         String
-  contentHash String   @unique
+  sourceKey   String @unique
+  contentHash String   
   embedding   Embedding1536
   createdAt   DateTime @default(now())
   updatedAt   DateTime @onCreate(now()) @onUpdate(now())

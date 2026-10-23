@@ -162,6 +162,13 @@
                   "kind": "scalar"
                 }
               },
+              "sourceKey": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "updatedAt": {
                 "nullable": false,
                 "type": {
@@ -197,6 +204,9 @@
                 },
                 "question": {
                   "column": "question"
+                },
+                "sourceKey": {
+                  "column": "sourceKey"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -438,6 +448,11 @@
                   "dataType": "pg/text",
                   "nullable": false
                 },
+                "sourceKey": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "dataType": "pg/timestamptz",
@@ -459,7 +474,7 @@
               "uniques": [
                 {
                   "columns": [
-                    "contentHash"
+                    "sourceKey"
                   ]
                 }
               ]
@@ -557,7 +572,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "f0062f8ae86917aff5e9b53bc19dce67cd8d70129da1fb2e3aa679362016975d"
+    "storageHash": "e9a81bee1b6d35b89795457df1e089e828d3b5fa5466b2db2753931d5e7468e1"
   },
   "execution": {
     "executionHash": "cf01fe62a958a860685b3d0c8359e1df237c8e2d10e034b08c6d2ddb9362dba3",

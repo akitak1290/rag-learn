@@ -1,4 +1,4 @@
-import { moderationClient } from "../../domains/llm.js";
+import { client as moderationClient } from "../../domains/llm.js";
 import { state as FlowState } from "../state.js";
 import { logger } from "../../utils/logger.js";
 import { classifyInjection } from "./guardrailClassifier.js";

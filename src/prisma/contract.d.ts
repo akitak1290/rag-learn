@@ -28,7 +28,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'f0062f8ae86917aff5e9b53bc19dce67cd8d70129da1fb2e3aa679362016975d'>;
+  StorageHashBase<'e9a81bee1b6d35b89795457df1e089e828d3b5fa5466b2db2753931d5e7468e1'>;
 export type ExecutionHash =
   ExecutionHashBase<'cf01fe62a958a860685b3d0c8359e1df237c8e2d10e034b08c6d2ddb9362dba3'>;
 export type ProfileHash =
@@ -295,6 +295,7 @@ export namespace Models {
     embedding: FieldOutputTypes['public']['Faq']['embedding'];
     id: FieldOutputTypes['public']['Faq']['id'];
     question: FieldOutputTypes['public']['Faq']['question'];
+    sourceKey: FieldOutputTypes['public']['Faq']['sourceKey'];
     updatedAt: FieldOutputTypes['public']['Faq']['updatedAt'];
     url: FieldOutputTypes['public']['Faq']['url'];
     readonly [RelationKeys]?: never;
@@ -447,6 +448,12 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly sourceKey: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
                 readonly updatedAt: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-temporal@1';
@@ -461,7 +468,7 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['contentHash'] }];
+              uniques: readonly [{ readonly columns: readonly ['sourceKey'] }];
               indexes: readonly [];
               foreignKeys: readonly [];
             };
@@ -664,6 +671,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly sourceKey: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly updatedAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -687,6 +698,7 @@ type ContractBase = Omit<
                 readonly embedding: { readonly column: 'embedding' };
                 readonly id: { readonly column: 'id' };
                 readonly question: { readonly column: 'question' };
+                readonly sourceKey: { readonly column: 'sourceKey' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
                 readonly url: { readonly column: 'url' };
               };
