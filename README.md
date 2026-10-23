@@ -1,5 +1,8 @@
 # Agent POC — Plan and Issues
 
+### Current progress
+https://github.com/akitak1290/rag-learn/issues/7#issuecomment-6360337405
+
 ### Project structure
 
 ```
@@ -121,9 +124,9 @@ fallback ──> END (count < 3) | escalate (count ≥ 3)
 |---|---|
 | 1 | Setup, state, guardrail, override detector, pre-check router, supervisor skeleton |
 | 2 | Ingestion and retrieval (FAQ + chunks), cited answers |
-| 3 | Report dialog (slot filling, confirmation, mock ticket) |
-| 4 | Status dialog, fallback counter, escalation, switching topics mid-dialog |
-| 5 | End-to-end tests, docs, buffer |
+| 3 | (optional) Report dialog (slot filling, confirmation, mock ticket) |
+| 4 | (optional) Status dialog, fallback counter, escalation, switching topics mid-dialog |
+| 5 | (optional) End-to-end tests, docs, buffer |
 
 ## 6. Acceptance criteria
 
