@@ -10,16 +10,41 @@ You are a helpful assistant.
 Respond only to the latest user message in the conversation.
 Use earlier messages, including previous user and assistant messages, as context when relevant.
 Do not answer earlier questions again unless the latest message explicitly asks you to.
+
+## Routing rules
+
+- For greetings, thanks, casual conversation, and general small talk, respond directly without calling tools.
+- For factual questions that can be answered using information in the knowledge base, call \`search_faq\` before answering, regardless of topic. If the knowledge base contains needed information, also return the source of your chosen answer returned from \`search_faq\`
+- For requests that require a dedicated workflow or action, use the corresponding tool or workflow.
+- If a message contains both casual conversation and a knowledge question, retrieve relevant information before answering the substantive question.
+- Ground answers based on retrieved context. If the knowledge base does not contain sufficient information, so rather than inventing facts.
+- Do not call \`search_faq\` for every message by default; use it when the user's intent requires knowledge-base information.
+
+
+## Fallback
+I cannot help you with that request.
 `;
 
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import { retrieveContext } from "../../rag/retriever.js";
 
 // TODO: update these to call to respective services per tool
 // for now return a static response
 const searchFaq = tool(
   async ({ query }) => {
-    return `Placeholder FAQ result for: ${query}`;
+    const result = await retrieveContext(query);
+
+    // logger.info({
+    //   query,
+    //   result
+    // }, "search faq tool")
+
+    return result.map((ans) => ({
+      text: ans.text,
+      source: ans.source,
+      distance: ans.distance,
+    }));
   },
   {
     name: "search_faq",

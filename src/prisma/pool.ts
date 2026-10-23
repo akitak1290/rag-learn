@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { config } from "../config.js";
 
-// DEPRECATED, used to test connection
+// raw db connection for querying vector store ONLY
 export const pool = new Pool({
   connectionString: config.pgUrl,
   max: 10,
