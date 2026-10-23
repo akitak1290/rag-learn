@@ -1,8 +1,8 @@
-import { pool } from "./db/pool.js";
+import { pool } from "./prisma/pool.js";
 import { app } from "./chat/app.js";
 import { config } from "./config.js";
 import { logger } from "./utils/logger.js";
-import { testConnection } from "./db/queries.js";
+import { testConnection } from "./prisma/queries.js";
 import type { Server } from "node:http";
 
 let server: Server | undefined;

@@ -1,0 +1,406 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.Chunk",
+    "label": "Create table \"Chunk\"",
+    "summary": "Creates table \"Chunk\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Chunk"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Chunk\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Chunk\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Chunk\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Chunk\"",
+        "sql": "CREATE TABLE \"public\".\"Chunk\" (\n  \"contentHash\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"docUrl\" text NOT NULL,\n  \"embedding\" vector(1536) NOT NULL,\n  \"id\" text NOT NULL,\n  \"idx\" int4 NOT NULL,\n  \"text\" text NOT NULL,\n  \"title\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Chunk\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Chunk\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Chunk\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Faq",
+    "label": "Create table \"Faq\"",
+    "summary": "Creates table \"Faq\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Faq"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Faq\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Faq\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Faq\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Faq\"",
+        "sql": "CREATE TABLE \"public\".\"Faq\" (\n  \"answer\" text NOT NULL,\n  \"contentHash\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"embedding\" vector(1536) NOT NULL,\n  \"id\" text NOT NULL,\n  \"question\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"url\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Faq\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Faq\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Faq\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.IndexingJob",
+    "label": "Create table \"IndexingJob\"",
+    "summary": "Creates table \"IndexingJob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "IndexingJob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"IndexingJob\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"IndexingJob\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"IndexingJob\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"IndexingJob\"",
+        "sql": "CREATE TABLE \"public\".\"IndexingJob\" (\n  \"chunksCreated\" int4 DEFAULT 0 NOT NULL,\n  \"completedAt\" timestamptz,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"documentsProcessed\" int4 DEFAULT 0 NOT NULL,\n  \"errorMessage\" text,\n  \"id\" text NOT NULL,\n  \"indexId\" text DEFAULT 'rmit-student-support' NOT NULL,\n  \"startedAt\" timestamptz,\n  \"status\" text DEFAULT 'queued' NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"IndexingJob\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"IndexingJob\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"IndexingJob\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "unique.Chunk.Chunk_contentHash_key",
+    "label": "Add unique constraint on \"Chunk\" (contentHash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Chunk_contentHash_key",
+        "table": "Chunk"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Chunk_contentHash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Chunk_contentHash_key",
+          "public",
+          "\"public\".\"Chunk\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Chunk_contentHash_key\" on \"Chunk\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Chunk_contentHash_key\"",
+        "sql": "ALTER TABLE \"public\".\"Chunk\" ADD CONSTRAINT \"Chunk_contentHash_key\" UNIQUE (\"contentHash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Chunk_contentHash_key\" exists on (contentHash)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Chunk_contentHash_key",
+          "public",
+          "\"public\".\"Chunk\"",
+          "u",
+          "[\"contentHash\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Chunk.Chunk_docUrl_idx_key",
+    "label": "Add unique constraint on \"Chunk\" (docUrl, idx)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Chunk_docUrl_idx_key",
+        "table": "Chunk"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Chunk_docUrl_idx_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Chunk_docUrl_idx_key",
+          "public",
+          "\"public\".\"Chunk\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Chunk_docUrl_idx_key\" on \"Chunk\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Chunk_docUrl_idx_key\"",
+        "sql": "ALTER TABLE \"public\".\"Chunk\" ADD CONSTRAINT \"Chunk_docUrl_idx_key\" UNIQUE (\"docUrl\", \"idx\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Chunk_docUrl_idx_key\" exists on (docUrl, idx)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Chunk_docUrl_idx_key",
+          "public",
+          "\"public\".\"Chunk\"",
+          "u",
+          "[\"docUrl\",\"idx\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Faq.Faq_contentHash_key",
+    "label": "Add unique constraint on \"Faq\" (contentHash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Faq_contentHash_key",
+        "table": "Faq"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Faq_contentHash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Faq_contentHash_key",
+          "public",
+          "\"public\".\"Faq\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Faq_contentHash_key\" on \"Faq\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Faq_contentHash_key\"",
+        "sql": "ALTER TABLE \"public\".\"Faq\" ADD CONSTRAINT \"Faq_contentHash_key\" UNIQUE (\"contentHash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Faq_contentHash_key\" exists on (contentHash)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Faq_contentHash_key",
+          "public",
+          "\"public\".\"Faq\"",
+          "u",
+          "[\"contentHash\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Chunk.Chunk_docUrl_idx_125d4b24",
+    "label": "Create index \"Chunk_docUrl_idx_125d4b24\" on \"Chunk\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Chunk_docUrl_idx_125d4b24",
+        "table": "Chunk"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Chunk_docUrl_idx_125d4b24\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Chunk_docUrl_idx_125d4b24\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Chunk_docUrl_idx_125d4b24\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Chunk_docUrl_idx_125d4b24\"",
+        "sql": "CREATE INDEX \"Chunk_docUrl_idx_125d4b24\" ON \"public\".\"Chunk\" (\"docUrl\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Chunk_docUrl_idx_125d4b24\" exists on \"Chunk\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Chunk_docUrl_idx_125d4b24\"",
+          "i",
+          "I",
+          "\"public\".\"Chunk\"",
+          "btree",
+          "[\"docUrl\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.IndexingJob.IndexingJob_status_createdAt_idx_58610442",
+    "label": "Create index \"IndexingJob_status_createdAt_idx_58610442\" on \"IndexingJob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "IndexingJob_status_createdAt_idx_58610442",
+        "table": "IndexingJob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"IndexingJob_status_createdAt_idx_58610442\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"IndexingJob_status_createdAt_idx_58610442\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"IndexingJob_status_createdAt_idx_58610442\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"IndexingJob_status_createdAt_idx_58610442\"",
+        "sql": "CREATE INDEX \"IndexingJob_status_createdAt_idx_58610442\" ON \"public\".\"IndexingJob\" (\"status\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"IndexingJob_status_createdAt_idx_58610442\" exists on \"IndexingJob\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"IndexingJob_status_createdAt_idx_58610442\"",
+          "i",
+          "I",
+          "\"public\".\"IndexingJob\"",
+          "btree",
+          "[\"status\",\"createdAt\"]"
+        ]
+      }
+    ]
+  }
+]

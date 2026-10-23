@@ -1,0 +1,44 @@
+// use prisma-8
+
+types {
+    Embedding1536 = pgvector.Vector(1536)
+}
+
+model Faq {
+  id          String   @id @onCreate(uuid())
+  question    String
+  answer      String
+  url         String
+  contentHash String   @unique
+  embedding   Embedding1536
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @onCreate(now()) @onUpdate(now())
+}
+
+model Chunk {
+  id          String   @id @onCreate(uuid())
+  docUrl      String
+  title       String
+  idx         Int
+  text        String
+  contentHash String   @unique
+  embedding   Embedding1536
+  createdAt   DateTime @default(now())
+
+  @@unique([docUrl, idx])
+  @@index([docUrl])
+}
+
+model IndexingJob {
+  id                 String    @id @onCreate(uuid())
+  indexId            String    @default("rmit-student-support")
+  status             String    @default("queued")
+  documentsProcessed Int       @default(0)
+  chunksCreated      Int       @default(0)
+  errorMessage       String?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime  @default(now())
+
+  @@index([status, createdAt])
+}

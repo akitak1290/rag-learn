@@ -44,6 +44,18 @@
 └── tsconfig.json
 ```
 
+### DB setup
+PostGreSQL with vector extension + Prisma v8 + DBeaver
+
+On initial setup, need to create the DB + tables. Workflow for prisma 8 has changed and need to create a 'contract' first prior to doing any migrations:
+
+Initial setup (https://www.prisma.io/docs/orm/extensions/using-extensions?utm_source=chatgpt.com#5-apply-and-query):
+- run db:generate:contract first to generate the contract
+- run db:generate:plan to generate the initial migration
+- run `npx prisma db init` to create the database, subsequent migration can use db:apply:migration
+
+Confirm the scripts' outputs and tables exist in DBeaver
+
 ## 1. Objective
 
 Build a TypeScript assistant with LangGraph and LangChain. It supports three things:
