@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rag poc - API Documentation</title>
+    <style>
+        body { margin: 0; padding: 0; }
+        #opencollection-container { width: 100vw; height: 100vh; }
+    </style>
+    <link rel="stylesheet" href="https://cdn.usebruno.com/api-docs/api-docs.css">
+    <script src="https://cdn.usebruno.com/api-docs/api-docs.js"></script>
+</head>
+<body>
+    <div id="opencollection-container"></div>
+    <script>
+        const collectionData = "opencollection: 1.0.0\ninfo:\n  name: rag poc\nconfig:\n  proxy:\n    inherit: true\n    config:\n      protocol: http\n      hostname: ''\n      port: ''\n      auth:\n        username: ''\n        password: ''\n      bypassProxy: ''\n  environments:\n    - name: local\n      variables:\n        - name: baseUrl\n          value: http://localhost:3000\nitems:\n  - info:\n      name: healthcheck\n      type: http\n      seq: 1\n    http:\n      method: GET\n      url: '{{baseUrl}}/healthcheck'\n      auth: inherit\n    settings:\n      encodeUrl: true\n      timeout: 0\n      followRedirects: true\n      maxRedirects: 5\n      forwardAuthorizationHeader: false\n  - info:\n      name: send message\n      type: http\n      seq: 2\n    http:\n      method: POST\n      url: '{{baseUrl}}/chat/send-message'\n      headers:\n        - name: session-id\n          value: '123'\n      body:\n        type: json\n        data: '{\"message\": \"hello\"}'\n      auth: inherit\n    settings:\n      encodeUrl: true\n      timeout: 0\n      followRedirects: true\n      maxRedirects: 5\n      forwardAuthorizationHeader: false\nbundled: true\nextensions:\n  bruno:\n    ignore:\n      - node_modules\n      - .git\n    exportedAt: '2026-10-26T03:31:29.117Z'\n    exportedUsing: Bruno/4.1.0\n";
+        new window.OpenCollection({
+            target: document.getElementById('opencollection-container'),
+            opencollection: collectionData,
+            theme: 'light'
+        });
+    </script>
+</body>
+</html>
